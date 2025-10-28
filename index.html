@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Modern Chat Interface</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      }
+
+      body {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .chat-container {
+        width: 100%;
+        max-width: 900px;
+        height: 85vh;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .chat-header {
+        background: linear-gradient(90deg, #4a6cf7, #6a11cb);
+        color: white;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      .chat-header .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: bold;
+      }
+
+      .chat-header .info h3 {
+        font-size: 20px;
+        margin-bottom: 5px;
+      }
+
+      .chat-header .info p {
+        font-size: 14px;
+        opacity: 0.9;
+      }
+
+      .chat-header .actions {
+        margin-left: auto;
+        display: flex;
+        gap: 15px;
+      }
+
+      .chat-header .actions i {
+        font-size: 20px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      .chat-header .actions i:hover {
+        transform: scale(1.2);
+      }
+
+      .chat-messages {
+        flex: 1;
+        padding: 25px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        background: #f8faff;
+      }
+
+      .message {
+        display: flex;
+        max-width: 75%;
+        animation: fadeIn 0.4s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(15px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .message.received {
+        align-self: flex-start;
+      }
+
+      .message.sent {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+      }
+
+      .message .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #4a6cf7, #6a11cb);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        flex-shrink: 0;
+        margin-top: auto;
+        font-size: 18px;
+      }
+
+      .message.received .avatar {
+        margin-right: 12px;
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+      }
+
+      .message.sent .avatar {
+        margin-left: 12px;
+        background: linear-gradient(135deg, #4a6cf7, #6a11cb);
+      }
+
+      .message-content {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 18px;
+        position: relative;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e6e9f0;
+      }
+
+      .message.sent .message-content {
+        background: linear-gradient(135deg, #4a6cf7, #6a11cb);
+        color: white;
+        border: none;
+      }
+
+      .message-text {
+        line-height: 1.5;
+        margin-bottom: 8px;
+      }
+
+      .message-time {
+        font-size: 12px;
+        opacity: 0.7;
+        text-align: right;
+      }
+
+      .message.sent .message-time {
+        text-align: left;
+      }
+
+      .message-status {
+        position: absolute;
+        bottom: 8px;
+        right: 15px;
+        font-size: 12px;
+        color: #4a6cf7;
+      }
+
+      .message.sent .message-status {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      .typing-indicator {
+        display: flex;
+        align-self: flex-start;
+        max-width: 75%;
+        align-items: center;
+        margin-top: 10px;
+      }
+
+      .typing-indicator .avatar {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        flex-shrink: 0;
+        margin-right: 12px;
+        font-size: 18px;
+      }
+
+      .typing-bubble {
+        background: white;
+        padding: 15px 20px;
+        border-radius: 18px;
+        display: flex;
+        gap: 5px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e6e9f0;
+      }
+
+      .typing-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #a0aec0;
+        animation: typingAnimation 1.4s infinite ease-in-out;
+      }
+
+      .typing-dot:nth-child(1) {
+        animation-delay: 0s;
+      }
+
+      .typing-dot:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+
+      .typing-dot:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      @keyframes typingAnimation {
+        0%,
+        60%,
+        100% {
+          transform: translateY(0);
+        }
+        30% {
+          transform: translateY(-5px);
+        }
+      }
+
+      .chat-input-container {
+        padding: 20px;
+        border-top: 1px solid #e6e9f0;
+        display: flex;
+        gap: 15px;
+        background: white;
+      }
+
+      .chat-input-container input {
+        flex: 1;
+        padding: 15px 20px;
+        border: 1px solid #e6e9f0;
+        border-radius: 30px;
+        outline: none;
+        font-size: 16px;
+        transition: all 0.3s;
+      }
+
+      .chat-input-container input:focus {
+        border-color: #4a6cf7;
+        box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.2);
+      }
+
+      .chat-input-container .actions {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+      }
+
+      .chat-input-container .actions i {
+        font-size: 22px;
+        color: #6c757d;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .chat-input-container .actions i:hover {
+        color: #4a6cf7;
+        transform: scale(1.1);
+      }
+
+      .send-button {
+        background: linear-gradient(135deg, #4a6cf7, #6a11cb);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(74, 108, 247, 0.4);
+      }
+
+      .send-button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(74, 108, 247, 0.6);
+      }
+
+      .date-divider {
+        text-align: center;
+        margin: 15px 0;
+        position: relative;
+      }
+
+      .date-divider span {
+        background: #e6e9f0;
+        padding: 6px 15px;
+        border-radius: 15px;
+        font-size: 13px;
+        color: #6c757d;
+        position: relative;
+        z-index: 1;
+      }
+
+      .date-divider:before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e6e9f0;
+        z-index: 0;
+      }
+
+      /* Responsive adjustments */
+      @media (max-width: 768px) {
+        .chat-container {
+          height: 90vh;
+        }
+
+        .message {
+          max-width: 85%;
+        }
+
+        .chat-header {
+          padding: 15px;
+        }
+
+        .chat-messages {
+          padding: 15px;
+        }
+      }
+
+      /* Scrollbar styling */
+      .chat-messages::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .chat-messages::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      .chat-messages::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+      }
+
+      .chat-messages::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <div class="chat-header">
+        <div class="avatar">JS</div>
+        <div class="info">
+          <h3>John Smith</h3>
+          <p>Online • Last seen 2:30 PM</p>
+        </div>
+        <div class="actions">
+          <i class="fas fa-video"></i>
+          <i class="fas fa-phone"></i>
+          <i class="fas fa-ellipsis-v"></i>
+        </div>
+      </div>
+
+      <div class="chat-messages">
+        <div class="date-divider">
+          <span>Today</span>
+        </div>
+
+        <div class="message received">
+          <div class="avatar">JS</div>
+          <div class="message-content">
+            <div class="message-text">
+              Hey there! How's your project coming along?
+            </div>
+            <div class="message-time">10:24 AM</div>
+          </div>
+        </div>
+
+        <div class="message sent">
+          <div class="avatar">Me</div>
+          <div class="message-content">
+            <div class="message-text">
+              It's going well! I just finished the initial design mockups. Would
+              you like to see them?
+            </div>
+            <div class="message-time">10:26 AM</div>
+            <div class="message-status">
+              <i class="fas fa-check-double"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="message received">
+          <div class="avatar">JS</div>
+          <div class="message-content">
+            <div class="message-text">
+              Absolutely! Send them over when you have a moment.
+            </div>
+            <div class="message-time">10:27 AM</div>
+          </div>
+        </div>
+
+        <div class="message sent">
+          <div class="avatar">Me</div>
+          <div class="message-content">
+            <div class="message-text">
+              Great! I'll share the Figma link with you in a bit. Also, do you
+              have any feedback on the color scheme?
+            </div>
+            <div class="message-time">10:28 AM</div>
+            <div class="message-status">
+              <i class="fas fa-check-double"></i>
+            </div>
+          </div>
+        </div>
+
+        <div class="message received">
+          <div class="avatar">JS</div>
+          <div class="message-content">
+            <div class="message-text">
+              I think the colors work well overall, but the primary blue might
+              be a bit too bright. Maybe try a slightly darker shade?
+            </div>
+            <div class="message-time">10:30 AM</div>
+          </div>
+        </div>
+
+        <div class="message sent">
+          <div class="avatar">Me</div>
+          <div class="message-content">
+            <div class="message-text">
+              That's a good point. I'll try #3A5BD9 instead and see how it
+              looks.
+            </div>
+            <div class="message-time">10:32 AM</div>
+            <div class="message-status"><i class="fas fa-check"></i></div>
+          </div>
+        </div>
+
+        <div class="typing-indicator">
+          <div class="avatar">JS</div>
+          <div class="typing-bubble">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-container">
+        <input type="text" placeholder="Type a message..." />
+        <div class="actions">
+          <i class="fas fa-paperclip"></i>
+          <i class="fas fa-smile"></i>
+          <i class="fas fa-image"></i>
+        </div>
+        <button class="send-button">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <script>
+      // Auto-scroll to bottom of chat
+      const chatMessages = document.querySelector(".chat-messages");
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // Simulate receiving a new message after 3 seconds
+      setTimeout(() => {
+        const typingIndicator = document.querySelector(".typing-indicator");
+        if (typingIndicator) {
+          typingIndicator.remove();
+
+          const newMessage = document.createElement("div");
+          newMessage.className = "message received";
+          newMessage.innerHTML = `
+                    <div class="avatar">JS</div>
+                    <div class="message-content">
+                        <div class="message-text">Also, let's schedule a call tomorrow to discuss the next steps.</div>
+                        <div class="message-time">${getCurrentTime()}</div>
+                    </div>
+                `;
+
+          chatMessages.appendChild(newMessage);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+      }, 3000);
+
+      // Send message on button click
+      document
+        .querySelector(".send-button")
+        .addEventListener("click", sendMessage);
+
+      // Send message on Enter key
+      document
+        .querySelector(".chat-input-container input")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            sendMessage();
+          }
+        });
+
+      function sendMessage() {
+        const input = document.querySelector(".chat-input-container input");
+        const messageText = input.value.trim();
+
+        if (messageText) {
+          const newMessage = document.createElement("div");
+          newMessage.className = "message sent";
+          newMessage.innerHTML = `
+                    <div class="avatar">Me</div>
+                    <div class="message-content">
+                        <div class="message-text">${messageText}</div>
+                        <div class="message-time">${getCurrentTime()}</div>
+                        <div class="message-status"><i class="fas fa-check"></i></div>
+                    </div>
+                `;
+
+          chatMessages.appendChild(newMessage);
+          input.value = "";
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+
+          // Update status to "read" after a delay
+          setTimeout(() => {
+            newMessage.querySelector(".message-status").innerHTML =
+              '<i class="fas fa-check-double"></i>';
+          }, 1500);
+
+          // Simulate reply after a short delay
+          setTimeout(() => {
+            const typingIndicator = document.createElement("div");
+            typingIndicator.className = "typing-indicator";
+            typingIndicator.innerHTML = `
+                        <div class="avatar">JS</div>
+                        <div class="typing-bubble">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    `;
+
+            chatMessages.appendChild(typingIndicator);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Remove typing indicator and add reply after 2 seconds
+            setTimeout(() => {
+              typingIndicator.remove();
+
+              const replies = [
+                "Sounds good!",
+                "I'll check that out.",
+                "Let me think about it.",
+                "Can we discuss this in our next meeting?",
+                "I agree with that approach.",
+              ];
+
+              const randomReply =
+                replies[Math.floor(Math.random() * replies.length)];
+
+              const replyMessage = document.createElement("div");
+              replyMessage.className = "message received";
+              replyMessage.innerHTML = `
+                            <div class="avatar">JS</div>
+                            <div class="message-content">
+                                <div class="message-text">${randomReply}</div>
+                                <div class="message-time">${getCurrentTime()}</div>
+                            </div>
+                        `;
+
+              chatMessages.appendChild(replyMessage);
+              chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 2000);
+          }, 1000);
+        }
+      }
+
+      function getCurrentTime() {
+        const now = new Date();
+        return now.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+    </script>
+  </body>
+</html>
